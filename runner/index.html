@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Shop-LitFluent runner</title>
+    <title>Speedometer 4 ideas runner</title>
     <style>
       body {
         font-family: system-ui, sans-serif;
@@ -32,6 +32,13 @@
   </head>
   <body>
     <label>
+      Suite
+      <select id="suite">
+        <option value="editor-highlight-api">Editor-HighlightAPI</option>
+        <option value="shop-lit-fluent">Shop-LitFluent</option>
+      </select>
+    </label>
+    <label>
       Iterations
       <input id="iterations" type="number" min="1" value="5" />
     </label>
@@ -40,17 +47,17 @@
     <table id="results"></table>
     <iframe id="frame"></iframe>
     <script type="module">
-      import suite from "./tests.mjs";
-      import { runSuite } from "./runner.mjs";
+      import { loadSuite, runSuite } from "./runner.mjs";
 
       const frame = document.getElementById("frame");
       const status = document.getElementById("status");
       const table = document.getElementById("results");
       const iterationsInput = document.getElementById("iterations");
+      const suiteSelect = document.getElementById("suite");
 
       const mean = (values) => values.reduce((a, b) => a + b, 0) / values.length;
 
-      function render(results) {
+      function render(suite, results) {
         const rows = suite.tests.map(({ name }) => {
           const sync = mean(results.map((r) => r[name].sync));
           const async = mean(results.map((r) => r[name].async));
@@ -83,8 +90,9 @@
       async function run() {
         const iterations = Number(iterationsInput.value);
         status.textContent = "Running…";
+        const suite = await loadSuite(suiteSelect.value);
         const results = await runSuite(suite, frame, iterations);
-        render(results);
+        render(suite, results);
         status.textContent = `Done (${iterations} iterations).`;
         window.benchmarkResults = results;
         document.title = "done";
@@ -93,6 +101,13 @@
       document.getElementById("run").addEventListener("click", run);
 
       const params = new URLSearchParams(location.search);
+      if (params.has("suite")) {
+        suiteSelect.value = params.get("suite");
+      }
+      suiteSelect.addEventListener("change", () => {
+        params.set("suite", suiteSelect.value);
+        history.replaceState(null, "", `?${params}`);
+      });
       if (params.has("iterations")) {
         iterationsInput.value = params.get("iterations");
       }

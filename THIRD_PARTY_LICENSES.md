@@ -18,7 +18,7 @@ under the MPL-2.0 in [LICENSE](LICENSE).
 | `shop-lit-fluent/lib/fluent-bundle.js` | @fluent/bundle 0.19.1, `index.js` | Apache-2.0 |
 | `shop-lit-fluent/lib/fluent-dom.js` | @fluent/dom 0.10.2, `index.js` | Apache-2.0 |
 | `shop-lit-fluent/lib/lit-all.min.js` | Lit 3.3.1, `all/lit-all.min.js` from <https://github.com/lit/dist> | BSD-3-Clause |
-| `shop-lit-fluent/runner.mjs` (`Page` lookup and step timing) | Derived from Speedometer, `resources/benchmark-runner.mjs` and `resources/shared/step-scheduler.mjs` | BSD-2-Clause |
+| `runner/runner.mjs` (`Page` lookup and step timing) | Derived from Speedometer, `resources/benchmark-runner.mjs` and `resources/shared/step-scheduler.mjs` | BSD-2-Clause |
 
 All npm packages were downloaded from <https://unpkg.com/> and are unmodified.
 
@@ -297,7 +297,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 Applies to:
 
-- `shop-lit-fluent/runner.mjs`
+- `runner/runner.mjs`
 
 ```text
 Copyright (C) 2013-2024 Apple Inc. All rights reserved.

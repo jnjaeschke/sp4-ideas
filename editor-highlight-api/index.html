@@ -230,16 +230,24 @@ const highlight = async (layoutTiming = '') => {
 		`paint ${(t3 - t2).toFixed(1)} ms`;
 };
 
-const loadSample = async value => {
-	if (value.startsWith('inline:')) {
-		const lang = value.slice('inline:'.length);
-		return { lang, source: document.getElementById(`inline-${lang}`).textContent.trimStart() };
+const samples = new Map();
+
+const loadSample = value => {
+	if (!samples.has(value)) {
+		samples.set(value, (async () => {
+			if (value.startsWith('inline:')) {
+				const lang = value.slice('inline:'.length);
+				return { lang, source: document.getElementById(`inline-${lang}`).textContent.trimStart() };
+			}
+			const response = await fetch(value);
+			if (!response.ok) {
+				throw new Error(`Failed to load ${value}: ${response.status}`);
+			}
+			return { lang: value.endsWith('.css') ? 'css' : 'js', source: await response.text() };
+		})());
+		samples.get(value).catch(() => samples.delete(value));
 	}
-	const response = await fetch(value);
-	if (!response.ok) {
-		throw new Error(`Failed to load ${value}: ${response.status}`);
-	}
-	return { lang: value.endsWith('.css') ? 'css' : 'js', source: await response.text() };
+	return samples.get(value);
 };
 
 const insert = async () => {
@@ -255,9 +263,9 @@ const insert = async () => {
 		return;
 	}
 	timings.textContent = `Highlighting ${sample.source.length.toLocaleString()} chars…`;
-	await nextPaint();
 	currentLang = sample.lang == 'css' ? Prism.languages.css : Prism.languages.javascript;
 	codeBlock.textContent = sample.source;
+	typedCharacters = 0;
 	if (document.getElementById('highlight-before-layout').checked) {
 		await highlight();
 		return;
@@ -267,11 +275,39 @@ const insert = async () => {
 	await highlight(`layout ${(performance.now() - t0).toFixed(1)} ms, `);
 };
 
-document.getElementById('insert').addEventListener('click', insert);
-document.getElementById('rehighlight').addEventListener('click', () => highlight());
-codeBlock.addEventListener('input', () => highlight());
+// The most recent insert, highlight or scroll; the runner waits for it.
+let currentOperation = Promise.resolve();
+const track = operation => (currentOperation = operation);
 
-insert();
+document.getElementById('insert').addEventListener('click', () => track(insert()));
+document.getElementById('rehighlight').addEventListener('click', () => track(highlight()));
+codeBlock.addEventListener('input', () => track(highlight()));
+
+// Functions for the benchmark steps (see tests.mjs).
+const typedText = 'const ';
+let typedCharacters = 0;
+
+window.preloadSamples = () => Promise.all(
+	[...document.getElementById('sample').options].map(option => loadSample(option.value)));
+
+window.whenIdle = () => currentOperation;
+
+// Types the next character of `typedText` at the start of the code, through
+// the editing command, so the regular input handler re-highlights.
+window.typeCharacter = () => {
+	codeBlock.focus();
+	getSelection().collapse(codeBlock.firstChild, typedCharacters);
+	document.execCommand('insertText', false, typedText[typedCharacters % typedText.length]);
+	typedCharacters++;
+	return currentOperation;
+};
+
+window.scrollToEnd = () => {
+	codeBlock.scrollTop = codeBlock.scrollHeight;
+	return track(nextPaint());
+};
+
+track(insert());
 </script>
 </body>
 </html>

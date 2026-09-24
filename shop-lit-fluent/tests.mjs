@@ -1,7 +1,7 @@
 // Suite definition in the shape of Speedometer's resources/tests.mjs, so it
 // can be dropped into the Speedometer repository by swapping the import below
 // for resources/benchmark-runner.mjs.
-import { BenchmarkTestStep } from "./runner.mjs";
+import { BenchmarkTestStep } from "../runner/runner.mjs";
 
 const app = ["shop-app"];
 

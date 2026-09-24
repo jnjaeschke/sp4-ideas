@@ -120,6 +120,14 @@ function loadFrame(frame, url) {
   });
 }
 
+// Loads `<name>/tests.mjs` from the repository root and resolves the suite's
+// URL relative to it.
+export async function loadSuite(name) {
+  const testsUrl = new URL(`../${name}/tests.mjs`, import.meta.url);
+  const { default: suite } = await import(testsUrl);
+  return { ...suite, url: new URL(suite.url, testsUrl).href };
+}
+
 // Runs the suite `iterations` times, each in a freshly loaded frame, and
 // returns one { [stepName]: { sync, async } } object per iteration.
 // `afterStep(stepName, frameWindow)` runs after each step, outside the timing.

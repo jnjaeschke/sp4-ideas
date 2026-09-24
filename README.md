@@ -6,8 +6,21 @@ own folder, with a README that explains what it tests and why.
 
 | Idea | Try it | What it tests |
 | --- | --- | --- |
-| [Editor-HighlightAPI](editor-highlight-api/README.md) | [Editor](https://jnjaeschke.github.io/sp4-ideas/editor-highlight-api/) | Code editor that highlights syntax with Prism and the CSS Custom Highlight API. Tests tens of thousands of `Range`s in `Highlight`s, and `::highlight()` layout and painting. |
-| [Shop-LitFluent](shop-lit-fluent/README.md) | [Shop](https://jnjaeschke.github.io/sp4-ideas/shop-lit-fluent/), [runner](https://jnjaeschke.github.io/sp4-ideas/shop-lit-fluent/runner.html) | Online shop built from Lit web components, localized with Fluent. Tests one `MutationObserver` registered on hundreds of shadow roots, with heavy observe/disconnect churn ([bug 1988776](https://bugzilla.mozilla.org/show_bug.cgi?id=1988776)). |
+| [Editor-HighlightAPI](editor-highlight-api/README.md) | [Editor](https://jnjaeschke.github.io/sp4-ideas/editor-highlight-api/), [runner](https://jnjaeschke.github.io/sp4-ideas/runner/?suite=editor-highlight-api) | Code editor that highlights syntax with Prism and the CSS Custom Highlight API. Tests tens of thousands of `Range`s in `Highlight`s, and `::highlight()` layout and painting. |
+| [Shop-LitFluent](shop-lit-fluent/README.md) | [Shop](https://jnjaeschke.github.io/sp4-ideas/shop-lit-fluent/), [runner](https://jnjaeschke.github.io/sp4-ideas/runner/?suite=shop-lit-fluent) | Online shop built from Lit web components, localized with Fluent. Tests one `MutationObserver` registered on hundreds of shadow roots, with heavy observe/disconnect churn ([bug 1988776](https://bugzilla.mozilla.org/show_bug.cgi?id=1988776)). |
+
+## Runner
+
+`runner/` runs a suite (`<idea>/tests.mjs`, in the format of Speedometer's
+`resources/tests.mjs`) in an iframe and shows the mean time per step. It
+times steps like Speedometer's `async` step scheduler: *sync* is the step
+itself; *async* lasts until a timer queued from a second
+`requestAnimationFrame` callback in the same frame has fired, and until the
+promise the step returns has resolved.
+
+URL parameters: `suite=<idea folder>`, `iterations=N` and `autorun`. When a
+run finishes, the runner sets `document.title` to `done` and stores the raw
+numbers in `window.benchmarkResults`.
 
 ## Running locally
 

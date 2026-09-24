@@ -56,6 +56,24 @@ the first layout of the text happens in *paint*, with all ranges present.
 The code block is editable. Each edit re-highlights the whole block. Use
 **Re-highlight** to measure a pass without changing the text.
 
+## Steps
+
+`tests.mjs` defines the suite for the repository's
+[runner](../README.md#runner):
+<http://localhost:8000/runner/?suite=editor-highlight-api>. Its `prepare`
+loads all samples, so no step fetches anything. Each step waits until the
+editor has highlighted and painted.
+
+| Step | Action |
+| --- | --- |
+| `OpenJQuery` | Insert jQuery (285 KB, about 36,000 ranges): lay out the text, then tokenize and highlight it |
+| `TypeCharacter1` … `TypeCharacter5` | Type one character at the start of the file (`execCommand("insertText")`). Each keystroke re-highlights the whole file |
+| `ScrollToEnd` | Scroll the code block to the end, which paints text that was not painted before |
+| `OpenBootstrap` | Insert Bootstrap CSS (281 KB, about 33,000 ranges) |
+
+The page provides `preloadSamples()`, `typeCharacter()`, `scrollToEnd()`
+and `whenIdle()` on `window` for these steps.
+
 ## Samples
 
 | Sample | Language | Size |
@@ -84,13 +102,13 @@ markup, CSS, C-like and JavaScript grammars.
 
 ## Open questions for a Speedometer workload
 
-- Steps: insert sample, re-highlight, type N characters, scroll? Typing is the
-  most realistic editor case.
 - Order: an editor that opens a file and highlights it in the same task lays
   out the text with all ranges present (**Highlight before first layout**).
-  In Firefox, that is much slower than laying out the text first. Decide
-  whether the workload inserts text and highlights in one step or in two.
-- Size: at D3 size, the first paint in Chromium takes seconds. Pick a size
-  that is heavy but not pathological.
-- Viewport: only the visible part of the text should need painting. Decide
-  whether the workload scrolls.
+  In Firefox, that is much slower than laying out the text first, so the
+  steps lay out first. Decide whether the suite should cover the other order
+  too.
+- Size: the steps use jQuery and Bootstrap. At D3 size, the first paint in
+  Chromium takes seconds.
+- Typing: real editors re-tokenize only the changed region. Re-highlighting
+  the whole file on each keystroke follows the CodePen, and makes typing the
+  heaviest part of the suite.

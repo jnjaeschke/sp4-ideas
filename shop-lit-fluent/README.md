@@ -72,12 +72,8 @@ currency. The exchange rate is fixed.
 - `shop-app.mjs`, `product-card.mjs`, `cart-badge.mjs`: the components.
 - `data.mjs`: the generated catalog.
 - `locales/en-US.ftl`, `locales/de.ftl`: the translations.
-- `tests.mjs`: the suite in the format of Speedometer's `resources/tests.mjs`.
-- `runner.mjs`, `runner.html`: a small local runner. It times steps like
-  Speedometer's `async` step scheduler: *sync* is the step itself; *async*
-  lasts until a timer queued from a second `requestAnimationFrame` callback
-  in the same frame has fired, and until the promise the step returns has
-  resolved.
+- `tests.mjs`: the suite in the format of Speedometer's `resources/tests.mjs`,
+  for the repository's [runner](../README.md#runner).
 - `lib/`: Lit 3.3.1 (`lit-all.min.js` from lit/dist), `@fluent/bundle`
   0.19.1, `@fluent/dom` 0.10.2 and `cached-iterable` 0.3.0 (UMD builds from
   npm). There is no build step.
@@ -92,9 +88,7 @@ python3 -m http.server
 ```
 
 - Shop: <http://localhost:8000/shop-lit-fluent/>
-- Runner: <http://localhost:8000/shop-lit-fluent/runner.html>. The runner
-  accepts `?iterations=N&autorun`. When it finishes, it sets `document.title`
-  to `done` and stores the raw numbers in `window.benchmarkResults`.
+- Runner: <http://localhost:8000/runner/?suite=shop-lit-fluent>
 
 ## Steps
 
