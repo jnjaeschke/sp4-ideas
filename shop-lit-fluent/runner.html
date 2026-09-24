@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Shop-LitFluent runner</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 1em;
+      }
+      iframe {
+        width: 800px;
+        height: 600px;
+        border: 1px solid #ccc;
+      }
+      table {
+        border-collapse: collapse;
+        margin-block: 1em;
+        font-variant-numeric: tabular-nums;
+      }
+      th,
+      td {
+        padding: 0.2em 0.8em;
+        text-align: end;
+        border-bottom: 1px solid #ddd;
+      }
+      th:first-child,
+      td:first-child {
+        text-align: start;
+      }
+    </style>
+  </head>
+  <body>
+    <label>
+      Iterations
+      <input id="iterations" type="number" min="1" value="5" />
+    </label>
+    <button id="run">Run</button>
+    <span id="status"></span>
+    <table id="results"></table>
+    <iframe id="frame"></iframe>
+    <script type="module">
+      import suite from "./tests.mjs";
+      import { runSuite } from "./runner.mjs";
+
+      const frame = document.getElementById("frame");
+      const status = document.getElementById("status");
+      const table = document.getElementById("results");
+      const iterationsInput = document.getElementById("iterations");
+
+      const mean = (values) => values.reduce((a, b) => a + b, 0) / values.length;
+
+      function render(results) {
+        const rows = suite.tests.map(({ name }) => {
+          const sync = mean(results.map((r) => r[name].sync));
+          const async = mean(results.map((r) => r[name].async));
+          return [name, sync, async, sync + async];
+        });
+        const total = mean(
+          results.map((r) =>
+            Object.values(r).reduce((sum, s) => sum + s.sync + s.async, 0),
+          ),
+        );
+        rows.push(["Total", NaN, NaN, total]);
+        table.innerHTML =
+          "<tr><th>Step (mean ms)</th><th>Sync</th><th>Async</th><th>Total</th></tr>" +
+          rows
+            .map(
+              (cells) =>
+                "<tr>" +
+                cells
+                  .map((c) =>
+                    typeof c == "number"
+                      ? `<td>${isNaN(c) ? "" : c.toFixed(1)}</td>`
+                      : `<td>${c}</td>`,
+                  )
+                  .join("") +
+                "</tr>",
+            )
+            .join("");
+      }
+
+      async function run() {
+        const iterations = Number(iterationsInput.value);
+        status.textContent = "Running…";
+        const results = await runSuite(suite, frame, iterations);
+        render(results);
+        status.textContent = `Done (${iterations} iterations).`;
+        window.benchmarkResults = results;
+        document.title = "done";
+      }
+
+      document.getElementById("run").addEventListener("click", run);
+
+      const params = new URLSearchParams(location.search);
+      if (params.has("iterations")) {
+        iterationsInput.value = params.get("iterations");
+      }
+      if (params.has("autorun")) {
+        run();
+      }
+    </script>
+  </body>
+</html>
